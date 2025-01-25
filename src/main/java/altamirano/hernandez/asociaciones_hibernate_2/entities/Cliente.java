@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "clientes")
@@ -19,9 +20,14 @@ public class Cliente {
     @Column(name = "update_at")
     private LocalDateTime updateAt;
 
-    // Relacion OneToMany - (Un cliente va a tener muchas direcciones) - Mapeada por al atributo cliente en la clase Direccion
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Direccion> direcciones = new ArrayList<>();
+    //Relacion OneToMany - Bidireccional (Un cliente tiene muchass facturas)
+    @OneToMany(mappedBy = "cliente", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Factura> facturas = new ArrayList<>();
+
+    // Relacion OneToMany - (Un cliente va a tener muchas direcciones) - Undireccional
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "cliente_id")
+    private List<Direccion> direcciones = new ArrayList<>();
 
     //Constuctores
     public Cliente(){}
@@ -65,6 +71,12 @@ public class Cliente {
     public void setDirecciones(List<Direccion> direcciones) {
         this.direcciones = direcciones;
     }
+    public List<Factura> getFacturas() {
+        return facturas;
+    }
+    public void setFacturas(List<Factura> facturas) {
+        this.facturas = facturas;
+    }
 
     //toString
     @Override
@@ -74,5 +86,16 @@ public class Cliente {
                 ", nombre='" + nombre + '\'' +
                 ", apellidos='" + apellidos + '\'' +
                 '}';
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cliente cliente = (Cliente) o;
+        return id == cliente.id && Objects.equals(nombre, cliente.nombre) && Objects.equals(apellidos, cliente.apellidos) && Objects.equals(creatAt, cliente.creatAt) && Objects.equals(updateAt, cliente.updateAt) && Objects.equals(direcciones, cliente.direcciones);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, nombre, apellidos, creatAt, updateAt, direcciones);
     }
 }

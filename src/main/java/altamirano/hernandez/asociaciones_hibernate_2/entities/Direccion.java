@@ -3,6 +3,7 @@ package altamirano.hernandez.asociaciones_hibernate_2.entities;
 import jakarta.persistence.*;
 
 import java.lang.ref.Cleaner;
+import java.util.Objects;
 
 @Entity
 @Table(name = "direcciones")
@@ -12,10 +13,6 @@ public class Direccion {
     private int id;
     private String calle;
     private String numero;
-    // Relacion ManyToOne (muchas direcciones tienen un cliente)
-    @ManyToOne
-    @JoinColumn(name = "cliente_id")
-    private Cliente cliente;
 
     //Constructores
     public Direccion() {}
@@ -43,10 +40,17 @@ public class Direccion {
     public void setNumero(String numero) {
         this.numero = numero;
     }
-    public Cliente getCliente(){
-        return this.cliente;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Direccion direccion = (Direccion) o;
+        return id == direccion.id && Objects.equals(calle, direccion.calle) && Objects.equals(numero, direccion.numero);
     }
-    public void setCliente(Cliente cliente){
-        this.cliente = cliente;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, calle, numero);
     }
 }

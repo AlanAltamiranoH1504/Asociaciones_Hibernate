@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootApplication
 public class AsociacionesHibernate2Application implements CommandLineRunner {
@@ -27,7 +28,7 @@ public class AsociacionesHibernate2Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        oneToManyNormal();
+        OneToManyBidireccional();
     }
 
     public void manyToOne(){
@@ -53,16 +54,57 @@ public class AsociacionesHibernate2Application implements CommandLineRunner {
 
     public void oneToManyNormal(){
         Cliente cliente3 = new Cliente("Raquel", "Hernandez Hernandez");
-        iClienteRepository.save(cliente3);
-
         Direccion direccion1 = new Direccion("Cerrada de Palmas", "15");
         Direccion direccion2 = new Direccion("Bugambilias", "15");
 
-        direccion1.setCliente(cliente3);
-        direccion2.setCliente(cliente3);
-        iDireccionRepository.save(direccion1);
-        iDireccionRepository.save(direccion2);
+        cliente3.getDirecciones().add(direccion1);
+        cliente3.getDirecciones().add(direccion2);
+        iClienteRepository.save(cliente3);
         System.out.println("Cliente y Direcciones Agregadas a la DB");
+    }
 
+    public void oneToManyUniClienteExistente(){
+        Cliente cliente1 = iClienteRepository.findById(1).orElse(null);
+        if (cliente1 != null){
+            Direccion direccion1 = new Direccion("Antonio Rodriguez", "17");
+            cliente1.getDirecciones().add(direccion1);
+
+            iClienteRepository.save(cliente1);
+            System.out.println("Direccion agregada al cliente con id 1");
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public void eliminarDireccionDeCliente(){
+        Cliente cliente = iClienteRepository.findById(1).orElse(null);
+        if (cliente != null){
+            Direccion direccion1 = iDireccionRepository.findById(3).orElse(null);
+            if (direccion1 != null){
+                cliente.getDirecciones().remove(direccion1);
+                iClienteRepository.save(cliente);
+                System.out.println("Al cliente " + cliente.getNombre() + " se le ha elimiado la direccion con id 1");
+            }else{
+                System.out.println("Direccion no encontrado");
+            }
+        }else{
+            System.out.println("Cliente no encontrado");
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public void OneToManyBidireccional(){
+        Cliente clienteNuevo = new Cliente("Vanessa", "Rivera Garcia");
+        Factura factura1 = new Factura("Concierto", 2000);
+        Factura factura2 = new Factura("Cine", 700);
+
+        clienteNuevo.getFacturas().add(factura1);
+        clienteNuevo.getFacturas().add(factura2);
+        factura1.setCliente(clienteNuevo);
+        factura2.setCliente(clienteNuevo);
+
+        iClienteRepository.save(clienteNuevo);
+        iFacturaRepository.save(factura1);
+        iFacturaRepository.save(factura2);
+        System.out.println("Cliente Agregado con Dos nuevas facturas");
     }
 }

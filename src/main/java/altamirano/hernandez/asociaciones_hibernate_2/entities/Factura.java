@@ -1,11 +1,10 @@
 package altamirano.hernandez.asociaciones_hibernate_2.entities;
 
 import jakarta.persistence.*;
-import jdk.jfr.consumer.RecordedThread;
-import org.springframework.beans.propertyeditors.ClassEditor;
-import org.springframework.cglib.core.Local;
+
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "facturas")
@@ -19,6 +18,7 @@ public class Factura {
     private LocalDateTime creatAt;
     @Column(name = "update_at")
     private LocalDateTime updateAt;
+
     //Relacion ManyToOne - (Muchas facturas tienen un cliente)
     @ManyToOne
     @JoinColumn(name = "cliente_id")
@@ -76,5 +76,16 @@ public class Factura {
                 ", total=" + total +
                 ", cliente=" + cliente +
                 '}';
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Factura factura = (Factura) o;
+        return id == factura.id && Double.compare(total, factura.total) == 0 && Objects.equals(descripcion, factura.descripcion) && Objects.equals(creatAt, factura.creatAt) && Objects.equals(updateAt, factura.updateAt) && Objects.equals(cliente, factura.cliente);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, descripcion, total, creatAt, updateAt, cliente);
     }
 }
