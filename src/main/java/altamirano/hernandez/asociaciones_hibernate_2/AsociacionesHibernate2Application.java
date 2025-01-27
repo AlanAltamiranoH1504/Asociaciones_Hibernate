@@ -28,7 +28,7 @@ public class AsociacionesHibernate2Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        OneToManyBidireccional();
+        deleteOneToManyBidireccional();
     }
 
     public void manyToOne(){
@@ -106,5 +106,44 @@ public class AsociacionesHibernate2Application implements CommandLineRunner {
         iFacturaRepository.save(factura1);
         iFacturaRepository.save(factura2);
         System.out.println("Cliente Agregado con Dos nuevas facturas");
+    }
+
+    @Transactional(readOnly = false)
+    public void oneToManyBidireccionalFindCliente(){
+        Cliente clienteVanessa = iClienteRepository.findById(13).orElse(null);
+        if (clienteVanessa != null){
+            Factura facturaVeterinario = new Factura("Veterinario de Bruno", 500);
+            clienteVanessa.getFacturas().add(facturaVeterinario);
+            facturaVeterinario.setCliente(clienteVanessa);
+
+            iClienteRepository.save(clienteVanessa);
+            iFacturaRepository.save(facturaVeterinario);
+            System.out.println("Al cliente " + clienteVanessa.getNombre() + " se le agrego su factura por: " + facturaVeterinario.getDescripcion());
+        }else{
+            System.out.println("No hay un cliente con ese ID");
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public void deleteOneToManyBidireccional(){
+        Cliente clienteVanessa = iClienteRepository.findById(2).orElse(null);
+
+        if (clienteVanessa != null){
+            Factura AlexaEcho = iFacturaRepository.facturaVeterinario("Pizza Elvis");
+            if (AlexaEcho != null){
+                Factura facturaEliminar = clienteVanessa.getFacturas()
+                        .stream()
+                        .filter(factura -> factura.getId() == AlexaEcho.getId())
+                        .findFirst()
+                        .orElse(null);
+                if (facturaEliminar != null){
+                    clienteVanessa.getFacturas().remove(facturaEliminar);
+                    iClienteRepository.save(clienteVanessa);
+                    System.out.println("Factura eliminada");
+                }
+            }
+        }else{
+            System.out.println("No hay un cliente con ese ID");
+        }
     }
 }

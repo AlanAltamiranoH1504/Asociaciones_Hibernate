@@ -20,7 +20,7 @@ public class Factura {
     private LocalDateTime updateAt;
 
     //Relacion ManyToOne - (Muchas facturas tienen un cliente)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
@@ -77,6 +77,7 @@ public class Factura {
                 ", cliente=" + cliente +
                 '}';
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -84,6 +85,7 @@ public class Factura {
         Factura factura = (Factura) o;
         return id == factura.id && Double.compare(total, factura.total) == 0 && Objects.equals(descripcion, factura.descripcion) && Objects.equals(creatAt, factura.creatAt) && Objects.equals(updateAt, factura.updateAt) && Objects.equals(cliente, factura.cliente);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, descripcion, total, creatAt, updateAt, cliente);
