@@ -1,11 +1,8 @@
 package altamirano.hernandez.asociaciones_hibernate_2;
 
-import altamirano.hernandez.asociaciones_hibernate_2.entities.Cliente;
-import altamirano.hernandez.asociaciones_hibernate_2.entities.Direccion;
-import altamirano.hernandez.asociaciones_hibernate_2.entities.Factura;
-import altamirano.hernandez.asociaciones_hibernate_2.repositories.IClienteRepository;
-import altamirano.hernandez.asociaciones_hibernate_2.repositories.IDireccionRepository;
-import altamirano.hernandez.asociaciones_hibernate_2.repositories.IFacturaRepository;
+import altamirano.hernandez.asociaciones_hibernate_2.entities.*;
+import altamirano.hernandez.asociaciones_hibernate_2.repositories.*;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,6 +18,12 @@ public class AsociacionesHibernate2Application implements CommandLineRunner {
     private IFacturaRepository iFacturaRepository;
     @Autowired
     private IDireccionRepository iDireccionRepository;
+    @Autowired
+    private IDatelleClienteRepository iDatelleClienteRepository;
+    @Autowired
+    private IEstudianteRepository iEstudianteRepository;
+    @Autowired
+    private ICursoRepository iCursoRepository;
 
     public static void main(String[] args) {
         SpringApplication.run(AsociacionesHibernate2Application.class, args);
@@ -28,7 +31,7 @@ public class AsociacionesHibernate2Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        deleteOneToManyBidireccional();
+        eliminarCursos();
     }
 
     public void manyToOne(){
@@ -144,6 +147,82 @@ public class AsociacionesHibernate2Application implements CommandLineRunner {
             }
         }else{
             System.out.println("No hay un cliente con ese ID");
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public void oneToOneClienteNuevo(){
+        Cliente cliente = new Cliente("Aichah", "Rangel Marquez");
+        DetalleCliente datalleClienteNuevo = new DetalleCliente(false, 500);
+        datalleClienteNuevo.setCliente(cliente);
+
+        iClienteRepository.save(cliente);
+        iDatelleClienteRepository.save(datalleClienteNuevo);
+        System.out.println("Cliente nuevo agregado y con detalles agregados a la DB");
+    }
+
+    @Transactional(readOnly = false)
+    public void oneToOneClienteExistente(){
+        Cliente clienteVanessa = iClienteRepository.findById(13).orElse(null);
+
+        if (clienteVanessa != null){
+            DetalleCliente detalleCliente = new DetalleCliente(true, 1500);
+            detalleCliente.setCliente(clienteVanessa);
+
+            iClienteRepository.save(clienteVanessa);
+            iDatelleClienteRepository.save(detalleCliente);
+            System.out.println("A cliente: " + clienteVanessa.getNombre() + " le fueron agregados detalles");
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public void oneToOneBidireccionalClienteNuevo(){
+        Cliente clienteNuevo = new Cliente("Yvonne", "Rubio");
+        DetalleCliente datelleYvonne = new DetalleCliente(true, 750);
+
+        clienteNuevo.setDetalleCliente(datelleYvonne);
+        datelleYvonne.setCliente(clienteNuevo);
+        iClienteRepository.save(clienteNuevo);
+        System.out.println("Cliente: " + clienteNuevo.getNombre() + " agregado con nuevos detalles");
+    }
+
+    @Transactional(readOnly = false)
+    public void ManyToManyUni(){
+        Estudiante estudiante = new Estudiante("Vanessa", "Adriana");
+        Curso java = new Curso("Java", "Andres");
+        Curso Js = new Curso("JS", "Juan Pablo");
+
+        estudiante.getCursos().add(java);
+        estudiante.getCursos().add(Js);
+        iEstudianteRepository.save(estudiante);
+        System.out.println("Estudiante agregado y con curso");
+    }
+
+    @Transactional(readOnly = false)
+    public void ManyToManyBiEstudianteExistente(){
+        Estudiante estudianteAlan = iEstudianteRepository.findById(7).orElse(null);
+        if (estudianteAlan != null){
+            Curso springBoot = new Curso("Spring Boot", "Andres");
+            estudianteAlan.getCursos().add(springBoot);
+            iEstudianteRepository.save(estudianteAlan);
+            System.out.println("Curso Spring agregado");
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public void eliminarCursos(){
+        Estudiante vanessa = iEstudianteRepository.findById(7).orElse(null);
+        if (vanessa != null){
+            Curso cursoEliminar = vanessa.getCursos().stream()
+                    .filter(curso -> curso.getId() == 11)
+                    .findFirst()
+                    .orElse(null);
+
+            if (cursoEliminar != null){
+                vanessa.getCursos().remove(cursoEliminar);
+                iEstudianteRepository.save(vanessa);
+                System.out.println("Curs de JS eliminado para vanessa");
+            }
         }
     }
 }

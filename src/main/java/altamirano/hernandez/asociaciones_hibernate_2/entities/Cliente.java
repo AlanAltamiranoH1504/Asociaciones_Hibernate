@@ -20,6 +20,10 @@ public class Cliente {
     @Column(name = "update_at")
     private LocalDateTime updateAt;
 
+    //Relacion OneToOne con DetalleCliente
+    @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    DetalleCliente detalleCliente;
+
     //Relacion OneToMany - Bidireccional (Un cliente tiene muchass facturas)
     @OneToMany(mappedBy = "cliente", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Factura> facturas = new ArrayList<>();
@@ -77,6 +81,12 @@ public class Cliente {
     public void setFacturas(List<Factura> facturas) {
         this.facturas = facturas;
     }
+    public DetalleCliente getDetalleCliente() {
+        return detalleCliente;
+    }
+    public void setDetalleCliente(DetalleCliente detalleCliente) {
+        this.detalleCliente = detalleCliente;
+    }
 
     //toString
     @Override
@@ -87,15 +97,17 @@ public class Cliente {
                 ", apellidos='" + apellidos + '\'' +
                 '}';
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Cliente cliente = (Cliente) o;
-        return id == cliente.id && Objects.equals(nombre, cliente.nombre) && Objects.equals(apellidos, cliente.apellidos) && Objects.equals(creatAt, cliente.creatAt) && Objects.equals(updateAt, cliente.updateAt) && Objects.equals(direcciones, cliente.direcciones);
+        return id == cliente.id && Objects.equals(nombre, cliente.nombre) && Objects.equals(apellidos, cliente.apellidos) && Objects.equals(creatAt, cliente.creatAt) && Objects.equals(updateAt, cliente.updateAt) && Objects.equals(detalleCliente, cliente.detalleCliente) && Objects.equals(facturas, cliente.facturas) && Objects.equals(direcciones, cliente.direcciones);
     }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, nombre, apellidos, creatAt, updateAt, direcciones);
+        return Objects.hash(id, nombre, apellidos, creatAt, updateAt, detalleCliente, facturas, direcciones);
     }
 }
